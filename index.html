@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Qi Signalwise</title>
+    <meta name="description" content="Obsidian-backed AI signal browser" />
+    <link rel="stylesheet" href="./styles.css?v=20260708-signal-graph" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="./qi-db.js" defer></script>
+    <script src="./qi-hot-db.js" defer></script>
+    <script src="./app.js?v=20260708-signal-graph" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#">
+          <span class="brand-mark" aria-hidden="true"><span></span><i></i><b></b></span>
+          <span class="brand-copy"><strong>Qi Signalwise</strong><small>Obsidian database</small></span>
+        </a>
+        <nav class="mode-tabs" id="modeTabs" aria-label="主栏目">
+          <button class="mode-tab active" type="button" data-mode="theme"><i data-lucide="folder-tree"></i><span>按主题分类</span></button>
+          <button class="mode-tab" type="button" data-mode="time"><i data-lucide="calendar-days"></i><span>按时间分类</span></button>
+          <button class="mode-tab" type="button" data-mode="aihot"><i data-lucide="zap"></i><span>综合</span></button>
+        </nav>
+        <div class="quick-filters" id="quickFilters" aria-label="快速过滤"></div>
+        <section class="side-card">
+          <p class="eyebrow">Database</p>
+          <strong id="dbSourceName">Obsidian Vault</strong>
+          <small id="dbSourcePath"></small>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">AI research intelligence agent</p>
+            <h1 id="pageTitle">按主题浏览 Qi 信号</h1>
+          </div>
+          <label class="search-box">
+            <i data-lucide="search"></i>
+            <input id="searchInput" type="search" placeholder="搜索标题、正文、作者、标签" />
+          </label>
+        </header>
+
+        <section class="stats-grid">
+          <div><span>Markdown</span><strong id="docCount">-</strong><small>Obsidian 文档</small></div>
+          <div><span>Signals</span><strong id="signalCount">-</strong><small>可检索信号</small></div>
+          <div><span>综合</span><strong id="aiHotCount">-</strong><small>公开 AI 动态</small></div>
+          <div><span>Favorites</span><strong id="favoriteCount">0</strong><small>本地收藏</small></div>
+        </section>
+
+        <section class="hot-panel" aria-label="热点精选">
+          <div class="panel-head split">
+            <div><p class="eyebrow">Combined feed</p><h2>综合精选</h2></div>
+            <span id="hotDate" class="count-pill">Latest</span>
+          </div>
+          <div id="hotList" class="hot-list"></div>
+        </section>
+
+        <section class="daily-panel" aria-label="日报">
+          <div class="panel-head split">
+            <div><p class="eyebrow">AI daily</p><h2>今日 AI 日报</h2></div>
+            <button id="dailyFocusButton" class="ghost-button" type="button"><i data-lucide="newspaper"></i><span>查看日报</span></button>
+          </div>
+          <div id="dailyDigest" class="daily-digest"></div>
+        </section>
+
+        <section class="main-grid">
+          <aside class="explorer-panel">
+            <div class="panel-head">
+              <div><p class="eyebrow" id="treeEyebrow">Theme tree</p><h2 id="treeTitle">主题大类 / 小类</h2></div>
+            </div>
+            <div id="treeList" class="tree-list"></div>
+          </aside>
+
+          <section class="results-panel">
+            <div class="panel-head split">
+              <div><p class="eyebrow" id="resultEyebrow">Browse</p><h2 id="resultTitle">内容列表</h2></div>
+              <span class="count-pill" id="resultCount">0</span>
+            </div>
+            <div class="content-tabs" id="contentTabs">
+              <button class="content-tab active" type="button" data-content="docs">文档</button>
+              <button class="content-tab" type="button" data-content="signals">信号</button>
+              <button class="content-tab" type="button" data-content="aihot">综合</button>
+              <button class="content-tab" type="button" data-content="reports">报告</button>
+              <button class="content-tab" type="button" data-content="favorites">收藏</button>
+            </div>
+            <div id="resultsList" class="results-list"></div>
+            <div class="pager" id="resultsPager" aria-label="列表翻页"></div>
+          </section>
+
+          <aside class="right-rail">
+            <article class="reader-panel">
+              <div class="panel-head split">
+                <div><p class="eyebrow">Reader</p><h2 id="readerTitle">选择内容</h2></div>
+                <div class="reader-actions">
+                  <button id="prevItemButton" class="ghost-button icon-only" type="button" title="上一条"><i data-lucide="chevron-left"></i><span>上一条</span></button>
+                  <button id="nextItemButton" class="ghost-button icon-only" type="button" title="下一条"><i data-lucide="chevron-right"></i><span>下一条</span></button>
+                  <button id="favoriteButton" class="ghost-button" type="button"><i data-lucide="star"></i><span>收藏</span></button>
+                </div>
+              </div>
+              <div id="readerMeta" class="reader-meta"></div>
+              <div id="readerContent" class="reader-content empty-reader">未选择内容</div>
+            </article>
+
+            <section class="relation-panel">
+              <div class="panel-head split">
+                <div><p class="eyebrow">Graph</p><h2>关联网络</h2></div>
+                <span id="relationCount" class="count-pill">0</span>
+              </div>
+              <div id="relationGraph" class="relation-graph"></div>
+            </section>
+
+            <section class="recommend-panel">
+              <div class="panel-head">
+                <div><p class="eyebrow">For you</p><h2>推荐系统</h2></div>
+              </div>
+              <div id="recommendList" class="recommend-list"></div>
+            </section>
+
+            <section class="assistant-panel">
+              <div class="panel-head">
+                <div><p class="eyebrow">Ask database</p><h2>提问机器人</h2></div>
+              </div>
+              <div class="question-chips" id="questionChips"></div>
+              <div class="ask-box">
+                <textarea id="questionInput" rows="3" placeholder="例如：本周 Agent Infra 有哪些重要趋势？"></textarea>
+                <button id="askButton" type="button"><i data-lucide="send"></i><span>提问</span></button>
+              </div>
+              <div id="answerBox" class="answer-box">等待提问</div>
+            </section>
+
+            <section class="favorites-panel">
+              <div class="panel-head"><div><p class="eyebrow">Saved</p><h2>收藏夹</h2></div></div>
+              <div id="favoritesList" class="mini-list"></div>
+            </section>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
